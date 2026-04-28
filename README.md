@@ -32,10 +32,14 @@ Required for Supabase-backed data:
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 - `SUPABASE_SERVICE_ROLE_KEY`
 
-Reserved for later collection automation:
+Required for collection automation:
 
 - `CRON_SECRET`
+
+Optional for LLM extraction. Without it, the app uses the rule-based extraction fallback:
+
 - `OPENAI_API_KEY`
+- `OPENAI_MODEL`
 
 ## Supabase Setup
 
@@ -45,6 +49,8 @@ Run these SQL files in the Supabase SQL editor:
 2. `supabase/seed.sql`
 
 The seed file creates sample published signals and a daily report.
+
+The seed file also creates three disabled example sources. Replace their URLs with real public sources and set `enabled = true` when ready.
 
 ## Current MVP Status
 
@@ -74,6 +80,46 @@ curl "http://localhost:3000/api/cron/collect?secret=$CRON_SECRET"
 It loads enabled rows from `sources`, collects public content, writes `raw_items`, extracts structured signals, deduplicates, auto-publishes high-confidence records, and updates `daily_reports`.
 
 For the MVP, Xiaohongshu collection only supports explicitly configured public note URLs. It does not crawl comments, private messages, or login-gated content.
+
+## Vercel Deployment
+
+1. Import the GitHub repository into Vercel.
+2. Add the environment variables listed above.
+3. Run `supabase/schema.sql` and `supabase/seed.sql` in Supabase.
+4. Configure real public sources in the `sources` table.
+5. Deploy.
+
+`vercel.json` configures a daily cron:
+
+```json
+{
+  "path": "/api/cron/collect?secret=$CRON_SECRET",
+  "schedule": "0 23 * * *"
+}
+```
+
+Vercel cron schedules are UTC. `0 23 * * *` runs at 07:00 China time.
+
+## Verification
+
+Run the full local verification suite:
+
+```bash
+pnpm verify
+```
+
+This runs linting, TypeScript checks, smoke tests, and a production build.
+
+## First Real Source Checklist
+
+For each real source added to Supabase:
+
+- Use a public URL that does not require login.
+- Set the correct `source_type`.
+- Keep `enabled = false` until the URL has been tested once.
+- Avoid sources that require CAPTCHA or aggressive interaction.
+- For Xiaohongshu, use only explicit public note URLs and keep `risk_level = medium`.
+- After a successful collection run, inspect `raw_items`, `signals`, and `daily_reports` in Supabase Table Editor.
 
 ## Product Boundaries
 
