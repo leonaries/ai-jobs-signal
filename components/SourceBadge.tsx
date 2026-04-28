@@ -10,9 +10,9 @@ export function SourceBadge({ sourceType }: SourceBadgeProps) {
     <span
       className={clsx(
         "inline-flex h-7 items-center border px-2.5 text-xs font-medium",
-        sourceType === "xiaohongshu" && "border-signal/30 bg-signal/10 text-signal",
-        sourceType === "website" && "border-steel/30 bg-steel/10 text-steel",
-        sourceType === "wechat" && "border-moss/30 bg-moss/10 text-moss",
+        sourceType === "xiaohongshu_public_url" && "border-signal/30 bg-signal/10 text-signal",
+        sourceType === "official_site" && "border-steel/30 bg-steel/10 text-steel",
+        sourceType === "social_manual" && "border-moss/30 bg-moss/10 text-moss",
         sourceType === "community" && "border-ink/20 bg-ink/5 text-ink/70"
       )}
     >

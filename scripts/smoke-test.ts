@@ -9,7 +9,7 @@ import type { RawCollectedItem } from "@/lib/sources/types";
 const recruitingItem: RawCollectedItem = {
   sourceId: "source-1",
   sourceUrl: "https://example.com/ai-agent-job",
-  sourceType: "website",
+  sourceType: "official_site",
   title: "AI Agent 产品团队招聘全栈工程师",
   excerpt:
     "团队正在招聘熟悉 Next.js、Python、Agent 工具调用和工作流编排的工程师，base 上海，可混合办公。",
@@ -42,7 +42,7 @@ async function main() {
   assert.equal(scoreAiNative("Agent RAG LLM 工具调用 工作流 模型评测") >= 80, true);
   assert.equal(
     scoreConfidence({
-      sourceType: "website",
+      sourceType: "official_site",
       hasRecruitingIntent: true,
       hasTeamContext: true,
       hasSkillTags: true,
@@ -51,10 +51,10 @@ async function main() {
     true
   );
 
-  assert.equal(decideStatus(88, "website", true, false), "published");
-  assert.equal(decideStatus(72, "xiaohongshu", false, false), "needs_review");
-  assert.equal(decideStatus(42, "website", true, false), "discarded");
-  assert.equal(decideStatus(95, "website", true, true), "duplicate");
+  assert.equal(decideStatus(88, "official_site", true, false), "published");
+  assert.equal(decideStatus(72, "xiaohongshu_public_url", false, false), "needs_review");
+  assert.equal(decideStatus(42, "official_site", true, false), "discarded");
+  assert.equal(decideStatus(95, "official_site", true, true), "duplicate");
 
   assert.equal(titleToSlug("AI Agent 产品团队招聘全栈工程师").length > 0, true);
   assert.equal(hashRawItem(recruitingItem), hashRawItem(recruitingItem));

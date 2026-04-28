@@ -1,14 +1,14 @@
 import { communityAdapter } from "@/lib/sources/community";
-import { wechatAdapter } from "@/lib/sources/wechat";
-import { websiteAdapter } from "@/lib/sources/website";
-import { xiaohongshuAdapter } from "@/lib/sources/xiaohongshu";
+import { officialSiteAdapter } from "@/lib/sources/official-site";
+import { socialManualAdapter } from "@/lib/sources/social-manual";
+import { xiaohongshuPublicUrlAdapter } from "@/lib/sources/xiaohongshu-public-url";
 import type { SourceRecord } from "@/lib/sources/types";
 
 const adapters = {
   community: communityAdapter,
-  wechat: wechatAdapter,
-  website: websiteAdapter,
-  xiaohongshu: xiaohongshuAdapter
+  official_site: officialSiteAdapter,
+  social_manual: socialManualAdapter,
+  xiaohongshu_public_url: xiaohongshuPublicUrlAdapter
 };
 
 export function getAdapterForSource(sourceType: SourceRecord["source_type"]) {

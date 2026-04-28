@@ -57,10 +57,10 @@ export function scoreConfidence({
   hasLocation: boolean;
 }) {
   const sourceBase: Record<SourceType, number> = {
-    website: 42,
-    wechat: 36,
+    official_site: 42,
+    social_manual: 30,
     community: 30,
-    xiaohongshu: 24
+    xiaohongshu_public_url: 24
   };
 
   return clampScore(
@@ -86,7 +86,7 @@ export function decideStatus(
     return "discarded" as const;
   }
 
-  if (sourceType === "xiaohongshu" && !hasCompleteXiaohongshuContext) {
+  if (sourceType === "xiaohongshu_public_url" && !hasCompleteXiaohongshuContext) {
     return "needs_review" as const;
   }
 

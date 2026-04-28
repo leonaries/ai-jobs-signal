@@ -1,4 +1,4 @@
-export type SourceType = "xiaohongshu" | "wechat" | "website" | "community";
+export type SourceType = "xiaohongshu_public_url" | "social_manual" | "official_site" | "community";
 
 export type SignalChannel =
   | "ai_fullstack"
@@ -85,9 +85,9 @@ export const channelLabels: Record<SignalChannel, string> = {
 };
 
 export const sourceLabels: Record<SourceType, string> = {
-  xiaohongshu: "小红书线索",
-  wechat: "公众号",
-  website: "官网",
+  xiaohongshu_public_url: "小红书公开链接",
+  social_manual: "手动社媒线索",
+  official_site: "官网",
   community: "社区"
 };
 

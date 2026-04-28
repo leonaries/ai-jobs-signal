@@ -21,9 +21,9 @@ const channels: Array<{ value?: SignalChannel; label: string }> = [
 
 const sources: Array<{ value?: SourceType; label: string }> = [
   { label: "全部来源" },
-  { value: "xiaohongshu", label: sourceLabels.xiaohongshu },
-  { value: "website", label: sourceLabels.website },
-  { value: "wechat", label: sourceLabels.wechat },
+  { value: "xiaohongshu_public_url", label: sourceLabels.xiaohongshu_public_url },
+  { value: "social_manual", label: sourceLabels.social_manual },
+  { value: "official_site", label: sourceLabels.official_site },
   { value: "community", label: sourceLabels.community }
 ];
 

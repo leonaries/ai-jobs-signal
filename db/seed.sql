@@ -9,7 +9,7 @@ insert into sources (
 ) values
 (
   '示例官网招聘页',
-  'website',
+  'official_site',
   'https://example.com/careers/rag-engineer',
   false,
   'daily',
@@ -18,8 +18,8 @@ insert into sources (
 ),
 (
   '示例小红书公开笔记',
-  'xiaohongshu',
-  'https://example.com/signals/agent-fullstack',
+  'xiaohongshu_public_url',
+  'https://www.xiaohongshu.com/explore/example-note',
   false,
   'daily',
   'medium',
@@ -33,6 +33,15 @@ insert into sources (
   'daily',
   'medium',
   '示例源，默认关闭。'
+),
+(
+  '示例手动社媒线索',
+  'social_manual',
+  'https://x.com/example/status/123',
+  false,
+  'manual',
+  'medium',
+  '某 AI Agent 创业团队公开招募 AI 全栈工程师，要求 Next.js、Python、LLM API 和工作流产品交付经验，可远程协作。'
 )
 on conflict do nothing;
 
@@ -80,7 +89,7 @@ insert into signals (
   '早期 AI Workflow 团队招募全栈工程师，强调 Agent 工具调用和交付闭环',
   '一个面向企业自动化场景的早期团队正在寻找能独立交付前后端与 LLM 调用链路的工程师。信号显示 Agent、工作流编排、工具调用和产品化能力被同时要求。',
   'https://example.com/signals/agent-fullstack',
-  'xiaohongshu',
+  'xiaohongshu_public_url',
   null,
   'AI Workflow 早期团队',
   'agent',
@@ -98,7 +107,7 @@ insert into signals (
   '企业知识库产品新增 RAG 应用工程方向，要求评测与数据治理经验',
   '官网招聘页出现 RAG 应用工程岗位，职责覆盖知识库接入、检索链路优化、回答质量评测和客户场景落地。相比泛泛的大模型岗位，这类需求更重工程稳定性。',
   'https://example.com/careers/rag-engineer',
-  'website',
+  'official_site',
   '某企业 AI SaaS 公司',
   '知识库产品线',
   'rag',

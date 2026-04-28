@@ -1,10 +1,14 @@
 create extension if not exists pgcrypto;
 
 do $$ begin
-  create type source_type as enum ('xiaohongshu', 'wechat', 'website', 'community');
+  create type source_type as enum ('xiaohongshu_public_url', 'social_manual', 'official_site', 'community');
 exception
   when duplicate_object then null;
 end $$;
+
+alter type source_type add value if not exists 'xiaohongshu_public_url';
+alter type source_type add value if not exists 'social_manual';
+alter type source_type add value if not exists 'official_site';
 
 do $$ begin
   create type signal_channel as enum ('ai_fullstack', 'agent', 'rag', 'ai_ide', 'multimodal', 'remote', 'early_team', 'other');

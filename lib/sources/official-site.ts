@@ -1,8 +1,8 @@
 import { stripHtml, truncateText } from "@/lib/utils/text";
 import type { RawCollectedItem, SourceAdapter } from "@/lib/sources/types";
 
-export const websiteAdapter: SourceAdapter = {
-  type: "website",
+export const officialSiteAdapter: SourceAdapter = {
+  type: "official_site",
   async collect(source) {
     const response = await fetch(source.url, {
       headers: {
@@ -30,7 +30,7 @@ export const websiteAdapter: SourceAdapter = {
         excerpt: truncateText(text, 420),
         content: truncateText(text, 6000),
         metadata: {
-          adapter: "website",
+          adapter: "official_site",
           contentType: response.headers.get("content-type")
         }
       } satisfies RawCollectedItem

@@ -133,3 +133,14 @@ For each real source added to Neon:
 - No comments or private messages.
 - No full-text copying of source content.
 - Xiaohongshu content is treated as public opportunity leads, not standard JD data.
+
+## Source Types
+
+The MVP uses a deliberately small source taxonomy:
+
+- `xiaohongshu_public_url`: explicitly configured public Xiaohongshu note URLs only.
+- `social_manual`: manually captured public social-media leads, with the post text or paraphrased context stored in `sources.notes`.
+- `official_site`: company websites, official recruiting pages, public recruiting articles.
+- `community`: developer community posts and public forum pages.
+
+`social_manual` is useful for X/Twitter, Xiaohongshu, LinkedIn, WeChat screenshots, or other social leads when official APIs are unavailable or not worth the cost. Keep the text short, public, attributed, and safe to summarize.

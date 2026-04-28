@@ -13,7 +13,7 @@ export async function publishSignal(
 ) {
   const slug = await createUniqueSlug(sql, titleToSlug(input.extracted.title));
   const hasCompleteXiaohongshuContext =
-    input.rawItem.sourceType !== "xiaohongshu" ||
+    input.rawItem.sourceType !== "xiaohongshu_public_url" ||
     Boolean(input.extracted.team_name || input.extracted.company_name) ||
     input.extracted.skill_tags.length >= 2;
   const status = decideStatus(
