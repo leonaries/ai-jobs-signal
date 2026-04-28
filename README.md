@@ -55,13 +55,25 @@ Implemented:
 - Shared signal types.
 - Supabase read helpers with mock fallback.
 - Supabase schema and seed data.
+- Public source adapters.
+- Rule-based extraction and scoring fallback.
+- Protected cron collection endpoint.
 
 Not implemented yet:
 
-- Source adapters.
-- LLM extraction and scoring.
-- Protected cron collection endpoint.
 - Daily automated collection.
+
+## Collection Endpoint
+
+The collection endpoint is protected by `CRON_SECRET`:
+
+```bash
+curl "http://localhost:3000/api/cron/collect?secret=$CRON_SECRET"
+```
+
+It loads enabled rows from `sources`, collects public content, writes `raw_items`, extracts structured signals, deduplicates, auto-publishes high-confidence records, and updates `daily_reports`.
+
+For the MVP, Xiaohongshu collection only supports explicitly configured public note URLs. It does not crawl comments, private messages, or login-gated content.
 
 ## Product Boundaries
 

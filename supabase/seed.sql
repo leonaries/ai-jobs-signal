@@ -1,3 +1,41 @@
+insert into sources (
+  name,
+  source_type,
+  url,
+  enabled,
+  crawl_frequency,
+  risk_level,
+  notes
+) values
+(
+  '示例官网招聘页',
+  'website',
+  'https://example.com/careers/rag-engineer',
+  false,
+  'daily',
+  'low',
+  '示例源，默认关闭。替换为真实公开招聘页后再启用。'
+),
+(
+  '示例小红书公开笔记',
+  'xiaohongshu',
+  'https://example.com/signals/agent-fullstack',
+  false,
+  'daily',
+  'medium',
+  '示例源，默认关闭。小红书仅配置公开 URL，不采评论、私信或登录后内容。'
+),
+(
+  '示例社区帖子',
+  'community',
+  'https://example.com/community/ai-ide',
+  false,
+  'daily',
+  'medium',
+  '示例源，默认关闭。'
+)
+on conflict do nothing;
+
 insert into daily_reports (
   report_date,
   title,
