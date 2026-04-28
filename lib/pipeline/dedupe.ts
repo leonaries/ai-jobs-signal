@@ -1,52 +1,43 @@
-import type { SupabaseClient } from "@supabase/supabase-js";
+import type { SqlClient } from "@/lib/db/client";
 
 export async function isDuplicateSignal(
-  supabase: SupabaseClient,
+  sql: SqlClient,
   input: {
     sourceUrl: string;
     slug: string;
     title: string;
   }
 ) {
-  const { data: byUrl, error: byUrlError } = await supabase
-    .from("signals")
-    .select("id,title,source_url,slug")
-    .eq("source_url", input.sourceUrl)
-    .limit(1);
+  const byUrl = await sql<Array<{ id: string }>>`
+    select id
+    from signals
+    where source_url = ${input.sourceUrl}
+    limit 1
+  `;
 
-  if (byUrlError) {
-    throw byUrlError;
-  }
-
-  if (byUrl && byUrl.length > 0) {
+  if (byUrl.length > 0) {
     return true;
   }
 
-  const { data: bySlug, error: bySlugError } = await supabase
-    .from("signals")
-    .select("id,title,source_url,slug")
-    .eq("slug", input.slug)
-    .limit(1);
+  const bySlug = await sql<Array<{ id: string }>>`
+    select id
+    from signals
+    where slug = ${input.slug}
+    limit 1
+  `;
 
-  if (bySlugError) {
-    throw bySlugError;
-  }
-
-  if (bySlug && bySlug.length > 0) {
+  if (bySlug.length > 0) {
     return true;
   }
 
-  const { data: recent, error: recentError } = await supabase
-    .from("signals")
-    .select("title")
-    .order("created_at", { ascending: false })
-    .limit(50);
+  const recent = await sql<Array<{ title: string }>>`
+    select title
+    from signals
+    order by created_at desc
+    limit 50
+  `;
 
-  if (recentError) {
-    throw recentError;
-  }
-
-  return (recent ?? []).some((signal) => titleSimilarity(signal.title, input.title) >= 0.86);
+  return recent.some((signal) => titleSimilarity(signal.title, input.title) >= 0.86);
 }
 
 function titleSimilarity(a: string, b: string) {

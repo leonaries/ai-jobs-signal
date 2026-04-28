@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { collectSignals } from "@/lib/pipeline/collect";
-import { createSupabaseServerClient, hasSupabaseConfig } from "@/lib/supabase/server";
+import { getSql, hasDatabaseConfig } from "@/lib/db/client";
 
 export async function GET(request: Request) {
   const expectedSecret = process.env.CRON_SECRET;
@@ -10,15 +10,14 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  if (!hasSupabaseConfig()) {
+  if (!hasDatabaseConfig()) {
     return NextResponse.json(
-      { error: "Supabase environment variables are required for collection." },
+      { error: "DATABASE_URL is required for collection." },
       { status: 500 }
     );
   }
 
-  const supabase = createSupabaseServerClient();
-  const summary = await collectSignals(supabase);
+  const summary = await collectSignals(getSql());
 
   return NextResponse.json({
     ok: true,

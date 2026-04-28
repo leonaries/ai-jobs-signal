@@ -1,60 +1,54 @@
 import { cache } from "react";
 import { mockSignals } from "@/lib/mock-data";
-import { createSupabaseServerClient, hasSupabaseConfig } from "@/lib/supabase/server";
+import { getSql, hasDatabaseConfig } from "@/lib/db/client";
 import type { Signal, SignalFilters, SkillTag } from "@/types/signal";
 
 const PAGE_SIZE = 24;
 
 export const getPublishedSignals = cache(async (filters: SignalFilters = {}) => {
-  if (!hasSupabaseConfig()) {
+  if (!hasDatabaseConfig()) {
     return filterMockSignals(filters);
   }
 
-  const supabase = createSupabaseServerClient();
-  let query = supabase
-    .from("signals")
-    .select("*")
-    .eq("status", "published")
-    .order("published_at", { ascending: false })
-    .limit(PAGE_SIZE);
+  const sql = getSql();
 
-  if (filters.channel) {
-    query = query.eq("channel", filters.channel);
-  }
-
-  if (filters.sourceType) {
-    query = query.eq("source_type", filters.sourceType);
-  }
-
-  const { data, error } = await query;
-
-  if (error) {
+  try {
+    const data = await sql<Signal[]>`
+      select *
+      from signals
+      where status = 'published'
+        and (${filters.channel ?? null}::signal_channel is null or channel = ${filters.channel ?? null}::signal_channel)
+        and (${filters.sourceType ?? null}::source_type is null or source_type = ${filters.sourceType ?? null}::source_type)
+      order by published_at desc nulls last
+      limit ${PAGE_SIZE}
+    `;
+    return data.map(normalizeSignal);
+  } catch (error) {
     console.error("Failed to fetch signals", error);
     return filterMockSignals(filters);
   }
-
-  return (data ?? []) as Signal[];
 });
 
 export const getSignalBySlug = cache(async (slug: string) => {
-  if (!hasSupabaseConfig()) {
+  if (!hasDatabaseConfig()) {
     return mockSignals.find((signal) => signal.slug === slug) ?? null;
   }
 
-  const supabase = createSupabaseServerClient();
-  const { data, error } = await supabase
-    .from("signals")
-    .select("*")
-    .eq("slug", slug)
-    .eq("status", "published")
-    .maybeSingle();
+  const sql = getSql();
 
-  if (error) {
+  try {
+    const data = await sql<Signal[]>`
+      select *
+      from signals
+      where slug = ${slug}
+        and status = 'published'
+      limit 1
+    `;
+    return data[0] ? normalizeSignal(data[0]) : null;
+  } catch (error) {
     console.error("Failed to fetch signal", error);
     return mockSignals.find((signal) => signal.slug === slug) ?? null;
   }
-
-  return (data as Signal | null) ?? null;
 });
 
 export const getHotTags = cache(async () => {
@@ -85,4 +79,26 @@ function filterMockSignals(filters: SignalFilters) {
 
     return true;
   });
+}
+
+function normalizeSignal(signal: Signal) {
+  return {
+    ...signal,
+    published_at: normalizeNullableDate(signal.published_at),
+    collected_at: normalizeDate(signal.collected_at),
+    created_at: normalizeDate(signal.created_at),
+    updated_at: normalizeDate(signal.updated_at)
+  } satisfies Signal;
+}
+
+function normalizeDate(value: string | Date) {
+  return value instanceof Date ? value.toISOString() : value;
+}
+
+function normalizeNullableDate(value: string | Date | null) {
+  if (!value) {
+    return null;
+  }
+
+  return normalizeDate(value);
 }

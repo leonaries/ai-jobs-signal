@@ -1,4 +1,4 @@
-import type { SupabaseClient } from "@supabase/supabase-js";
+import type { SqlClient } from "@/lib/db/client";
 import type { RawCollectedItem } from "@/lib/sources/types";
 import { sha256 } from "@/lib/utils/hash";
 
@@ -20,61 +20,56 @@ export function hashRawItem(item: RawCollectedItem) {
   return sha256(`${item.sourceUrl}\n${item.title}\n${item.content}`);
 }
 
-export async function storeRawItem(supabase: SupabaseClient, item: RawCollectedItem) {
+export async function storeRawItem(sql: SqlClient, item: RawCollectedItem) {
   const rawContentHash = hashRawItem(item);
-  const { data: existing, error: existingError } = await supabase
-    .from("raw_items")
-    .select("*")
-    .eq("raw_content_hash", rawContentHash)
-    .maybeSingle();
+  const existing = await sql<StoredRawItem[]>`
+    select *
+    from raw_items
+    where raw_content_hash = ${rawContentHash}
+    limit 1
+  `;
 
-  if (existingError) {
-    throw existingError;
+  if (existing[0]) {
+    return { item: existing[0], created: false };
   }
 
-  if (existing) {
-    return { item: existing as StoredRawItem, created: false };
-  }
-
-  const { data, error } = await supabase
-    .from("raw_items")
-    .insert({
-      source_id: item.sourceId,
-      source_url: item.sourceUrl,
-      source_type: item.sourceType,
-      raw_title: item.title,
-      raw_excerpt: item.excerpt,
-      raw_content_hash: rawContentHash,
-      raw_metadata: {
+  const data = await sql<StoredRawItem[]>`
+    insert into raw_items (
+      source_id,
+      source_url,
+      source_type,
+      raw_title,
+      raw_excerpt,
+      raw_content_hash,
+      raw_metadata
+    ) values (
+      ${item.sourceId},
+      ${item.sourceUrl},
+      ${item.sourceType}::source_type,
+      ${item.title},
+      ${item.excerpt},
+      ${rawContentHash},
+      ${sql.json({
         ...item.metadata,
         contentLength: item.content.length
-      }
-    })
-    .select("*")
-    .single();
+      })}
+    )
+    returning *
+  `;
 
-  if (error) {
-    throw error;
-  }
-
-  return { item: data as StoredRawItem, created: true };
+  return { item: data[0], created: true };
 }
 
 export async function updateRawItemStatus(
-  supabase: SupabaseClient,
+  sql: SqlClient,
   id: string,
   status: StoredRawItem["processing_status"],
   errorMessage?: string
 ) {
-  const { error } = await supabase
-    .from("raw_items")
-    .update({
-      processing_status: status,
-      error_message: errorMessage ?? null
-    })
-    .eq("id", id);
-
-  if (error) {
-    throw error;
-  }
+  await sql`
+    update raw_items
+    set processing_status = ${status}::raw_processing_status,
+        error_message = ${errorMessage ?? null}
+    where id = ${id}
+  `;
 }

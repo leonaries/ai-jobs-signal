@@ -2,9 +2,11 @@
 .env
 .env*.local
 .next/
+.agents/
 node_modules/
 out/
 dist/
 coverage/
 artifacts/
+skills-lock.json
 *.tsbuildinfo

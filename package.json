@@ -9,13 +9,16 @@
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "smoke": "tsx scripts/smoke-test.ts",
+    "db:schema": "tsx --env-file=.env.local scripts/run-sql-file.ts db/schema.sql",
+    "db:seed": "tsx --env-file=.env.local scripts/run-sql-file.ts db/seed.sql",
+    "db:setup": "pnpm db:schema && pnpm db:seed",
     "verify": "pnpm lint && pnpm typecheck && pnpm smoke && pnpm build"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.49.4",
     "clsx": "^2.1.1",
     "lucide-react": "^0.468.0",
     "next": "^15.1.4",
+    "postgres": "^3.4.9",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },

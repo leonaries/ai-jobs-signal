@@ -1,4 +1,4 @@
-import type { SupabaseClient } from "@supabase/supabase-js";
+import type { SqlClient } from "@/lib/db/client";
 import { extractSignal } from "@/lib/ai/extractSignal";
 import { summarizeDaily } from "@/lib/ai/summarizeDaily";
 import { prefilterRawItem } from "@/lib/pipeline/prefilter";
@@ -21,7 +21,7 @@ export type CollectSummary = {
   errors: number;
 };
 
-export async function collectSignals(supabase: SupabaseClient): Promise<CollectSummary> {
+export async function collectSignals(sql: SqlClient): Promise<CollectSummary> {
   const summary: CollectSummary = {
     sources: 0,
     collected: 0,
@@ -33,7 +33,7 @@ export async function collectSignals(supabase: SupabaseClient): Promise<CollectS
     errors: 0
   };
 
-  const sources = await loadEnabledSources(supabase);
+  const sources = await loadEnabledSources(sql);
   summary.sources = sources.length;
 
   for (const source of sources) {
@@ -43,7 +43,7 @@ export async function collectSignals(supabase: SupabaseClient): Promise<CollectS
       summary.collected += items.length;
 
       for (const item of items) {
-        await processRawCollectedItem(supabase, item, summary);
+        await processRawCollectedItem(sql, item, summary);
       }
     } catch (error) {
       summary.errors += 1;
@@ -51,26 +51,20 @@ export async function collectSignals(supabase: SupabaseClient): Promise<CollectS
     }
   }
 
-  await updateDailyReport(supabase);
+  await updateDailyReport(sql);
   return summary;
 }
 
-async function loadEnabledSources(supabase: SupabaseClient) {
-  const { data, error } = await supabase.from("sources").select("*").eq("enabled", true);
-
-  if (error) {
-    throw error;
-  }
-
-  return (data ?? []) as SourceRecord[];
+async function loadEnabledSources(sql: SqlClient) {
+  return sql<SourceRecord[]>`
+    select *
+    from sources
+    where enabled = true
+  `;
 }
 
-async function processRawCollectedItem(
-  supabase: SupabaseClient,
-  item: RawCollectedItem,
-  summary: CollectSummary
-) {
-  const stored = await storeRawItem(supabase, item);
+async function processRawCollectedItem(sql: SqlClient, item: RawCollectedItem, summary: CollectSummary) {
+  const stored = await storeRawItem(sql, item);
   if (!stored.created) {
     summary.duplicate += 1;
     return;
@@ -78,26 +72,26 @@ async function processRawCollectedItem(
 
   const prefilter = prefilterRawItem(item);
   if (!prefilter.shouldProcess) {
-    await updateRawItemStatus(supabase, stored.item.id, "discarded");
+    await updateRawItemStatus(sql, stored.item.id, "discarded");
     summary.discarded += 1;
     return;
   }
 
   try {
     const extracted = await extractSignal(item);
-    const duplicate = await isDuplicateSignal(supabase, {
+    const duplicate = await isDuplicateSignal(sql, {
       sourceUrl: item.sourceUrl,
       slug: titleToSlug(extracted.title),
       title: extracted.title
     });
 
-    const signal = await publishSignal(supabase, {
+    const signal = await publishSignal(sql, {
       rawItem: item,
       extracted,
       duplicate
     });
 
-    await updateRawItemStatus(supabase, stored.item.id, "processed");
+    await updateRawItemStatus(sql, stored.item.id, "processed");
     summary.processed += 1;
 
     if (signal.status === "published") summary.published += 1;
@@ -106,7 +100,7 @@ async function processRawCollectedItem(
     if (signal.status === "duplicate") summary.duplicate += 1;
   } catch (error) {
     await updateRawItemStatus(
-      supabase,
+      sql,
       stored.item.id,
       "error",
       error instanceof Error ? error.message : "Unknown processing error"
@@ -115,31 +109,38 @@ async function processRawCollectedItem(
   }
 }
 
-async function updateDailyReport(supabase: SupabaseClient) {
+async function updateDailyReport(sql: SqlClient) {
   const today = new Date().toISOString().slice(0, 10);
-  const { data, error } = await supabase
-    .from("signals")
-    .select("*")
-    .eq("status", "published")
-    .gte("published_at", `${today}T00:00:00.000Z`)
-    .order("published_at", { ascending: false });
+  const data = await sql<Signal[]>`
+    select *
+    from signals
+    where status = 'published'
+      and published_at >= ${`${today}T00:00:00.000Z`}
+    order by published_at desc
+  `;
 
-  if (error) {
-    throw error;
-  }
-
-  const report = summarizeDaily((data ?? []) as Signal[]);
-  const { error: upsertError } = await supabase.from("daily_reports").upsert(
-    {
-      report_date: today,
-      ...report
-    },
-    {
-      onConflict: "report_date"
-    }
-  );
-
-  if (upsertError) {
-    throw upsertError;
-  }
+  const report = summarizeDaily(data);
+  await sql`
+    insert into daily_reports (
+      report_date,
+      title,
+      summary,
+      hot_tags,
+      rising_channels,
+      published_signal_count
+    ) values (
+      ${today},
+      ${report.title},
+      ${report.summary},
+      ${sql.json(report.hot_tags)},
+      ${sql.json(report.rising_channels)},
+      ${report.published_signal_count}
+    )
+    on conflict (report_date) do update set
+      title = excluded.title,
+      summary = excluded.summary,
+      hot_tags = excluded.hot_tags,
+      rising_channels = excluded.rising_channels,
+      published_signal_count = excluded.published_signal_count
+  `;
 }

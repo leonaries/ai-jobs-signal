@@ -7,7 +7,7 @@
 - Next.js App Router
 - TypeScript
 - Tailwind CSS
-- Supabase Postgres
+- Neon Postgres
 
 ## Local Development
 
@@ -16,21 +16,19 @@ pnpm install
 pnpm dev
 ```
 
-The app can run without Supabase environment variables. In that case it falls back to local mock data so the first UI milestone is previewable immediately.
+The app can run without `DATABASE_URL`. In that case it falls back to local mock data so the UI is previewable immediately.
 
 ## Environment Variables
 
-Copy `.env.example` to `.env.local` and fill in values when a Supabase project is ready.
+Copy `.env.example` to `.env.local` and fill in your Neon connection string.
 
 ```bash
 cp .env.example .env.local
 ```
 
-Required for Supabase-backed data:
+Required for Neon-backed data:
 
-- `NEXT_PUBLIC_SUPABASE_URL`
-- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-- `SUPABASE_SERVICE_ROLE_KEY`
+- `DATABASE_URL`
 
 Required for collection automation:
 
@@ -41,12 +39,18 @@ Optional for LLM extraction. Without it, the app uses the rule-based extraction 
 - `OPENAI_API_KEY`
 - `OPENAI_MODEL`
 
-## Supabase Setup
+## Neon Setup
 
-Run these SQL files in the Supabase SQL editor:
+Run the schema and seed SQL against Neon:
 
-1. `supabase/schema.sql`
-2. `supabase/seed.sql`
+```bash
+pnpm db:setup
+```
+
+The SQL files live in:
+
+1. `db/schema.sql`
+2. `db/seed.sql`
 
 The seed file creates sample published signals and a daily report.
 
@@ -59,8 +63,8 @@ Implemented:
 - News-feed homepage.
 - Signal detail page.
 - Shared signal types.
-- Supabase read helpers with mock fallback.
-- Supabase schema and seed data.
+- Neon read helpers with mock fallback.
+- Neon schema and seed data.
 - Public source adapters.
 - Rule-based extraction and scoring fallback.
 - Protected cron collection endpoint.
@@ -85,9 +89,10 @@ For the MVP, Xiaohongshu collection only supports explicitly configured public n
 
 1. Import the GitHub repository into Vercel.
 2. Add the environment variables listed above.
-3. Run `supabase/schema.sql` and `supabase/seed.sql` in Supabase.
-4. Configure real public sources in the `sources` table.
-5. Deploy.
+3. Add `DATABASE_URL` and `CRON_SECRET` in Vercel environment variables.
+4. Run `pnpm db:setup` locally or run `db/schema.sql` and `db/seed.sql` against Neon.
+5. Configure real public sources in the `sources` table.
+6. Deploy.
 
 `vercel.json` configures a daily cron:
 
@@ -112,14 +117,14 @@ This runs linting, TypeScript checks, smoke tests, and a production build.
 
 ## First Real Source Checklist
 
-For each real source added to Supabase:
+For each real source added to Neon:
 
 - Use a public URL that does not require login.
 - Set the correct `source_type`.
 - Keep `enabled = false` until the URL has been tested once.
 - Avoid sources that require CAPTCHA or aggressive interaction.
 - For Xiaohongshu, use only explicit public note URLs and keep `risk_level = medium`.
-- After a successful collection run, inspect `raw_items`, `signals`, and `daily_reports` in Supabase Table Editor.
+- After a successful collection run, inspect `raw_items`, `signals`, and `daily_reports` in Neon.
 
 ## Product Boundaries
 
