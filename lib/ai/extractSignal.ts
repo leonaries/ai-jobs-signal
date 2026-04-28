@@ -18,6 +18,12 @@ const skillPatterns = [
   "MCP",
   "AI IDE",
   "多模态",
+  "Vercel AI SDK",
+  "OpenAI",
+  "Anthropic",
+  "function calling",
+  "structured outputs",
+  "embedding",
   "Prompt",
   "工作流",
   "工具调用",
@@ -150,10 +156,10 @@ function normalizeExtractedSignal(value: Partial<ExtractedSignal>, item: RawColl
 }
 
 function inferChannel(text: string): SignalChannel {
-  if (/Agent|agent|工具调用|工作流|workflow/.test(text)) return "agent";
+  if (/Agent|agent|工具调用|function calling|structured outputs|工作流|workflow/.test(text)) return "agent";
   if (/RAG|rag|知识库|向量数据库/.test(text)) return "rag";
   if (/AI IDE|Cursor|Claude Code|编辑器|开发者工具/.test(text)) return "ai_ide";
-  if (/多模态|图像|视频|语音/.test(text)) return "multimodal";
+  if (/多模态|图像|视频/.test(text)) return "multimodal";
   if (/远程|remote/i.test(text)) return "remote";
   if (/早期|创业|合伙人|从 0 到 1|0 到 1/.test(text)) return "early_team";
   if (/全栈|Next\.js|React|前后端/.test(text)) return "ai_fullstack";

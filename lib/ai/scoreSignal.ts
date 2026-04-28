@@ -27,6 +27,8 @@ const highSignalTerms = [
   "LLM",
   "大模型",
   "工具调用",
+  "function calling",
+  "structured outputs",
   "Tool Calling",
   "workflow",
   "工作流",
@@ -35,7 +37,11 @@ const highSignalTerms = [
   "知识库",
   "MCP",
   "AI IDE",
-  "多模态"
+  "多模态",
+  "Vercel AI SDK",
+  "OpenAI",
+  "Anthropic",
+  "embedding"
 ];
 
 export function scoreAiNative(text: string) {
