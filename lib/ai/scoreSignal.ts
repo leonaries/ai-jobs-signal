@@ -41,7 +41,14 @@ const highSignalTerms = [
   "Vercel AI SDK",
   "OpenAI",
   "Anthropic",
-  "embedding"
+  "embedding",
+  "Embeddings",
+  "AI engineering",
+  "self-healing",
+  "diagnose",
+  "diagnosis",
+  "agent system",
+  "agent systems"
 ];
 
 export function scoreAiNative(text: string) {
