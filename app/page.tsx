@@ -32,7 +32,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
             AI Jobs Signal
           </div>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-ink/58">
-            从公开信源里发现国内 AI 开发岗位、早期团队、远程协作和技能趋势。
+            从公开信源里发现全球 AI 开发岗位、早期团队、远程协作和技能趋势。
           </p>
         </div>
         <div className="text-left text-xs uppercase tracking-[0.16em] text-ink/45 md:text-right">

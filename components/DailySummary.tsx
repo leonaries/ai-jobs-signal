@@ -15,7 +15,7 @@ export function DailySummary({ report }: DailySummaryProps) {
             Daily Brief · {report.report_date}
           </div>
           <h1 className="max-w-3xl font-display text-4xl leading-none md:text-6xl">
-            国内 AI 开发机会信号
+            全球 AI 开发机会信号
           </h1>
           <p className="mt-6 max-w-3xl text-lg leading-8 text-paper/76">{report.summary}</p>
         </div>

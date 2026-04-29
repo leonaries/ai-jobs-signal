@@ -92,7 +92,7 @@ async function tryExtractWithOpenAI(item: RawCollectedItem): Promise<ExtractedSi
           {
             role: "system",
             content:
-              "Extract a domestic AI developer opportunity signal from public source text. Return compact JSON only. Paraphrase summaries; do not copy full source content."
+              "Extract a global AI developer opportunity signal from public source text. Return compact JSON only. Paraphrase summaries; do not copy full source content."
           },
           {
             role: "user",

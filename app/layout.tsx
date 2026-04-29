@@ -3,7 +3,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "AI Jobs Signal",
-  description: "国内 AI 开发机会信号雷达"
+  description: "全球 AI 开发机会信号雷达"
 };
 
 export default function RootLayout({
